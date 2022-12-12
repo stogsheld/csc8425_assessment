@@ -1,0 +1,53 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+.idea/dataSources.local.xml
+.idea/dataSources.xml
+.idea/dataSources.xml
+.idea/dataSources/c7d26e50-1b02-44cc-a8f3-fc788b31c873.xml
+.idea/dataSources/c7d26e50-1b02-44cc-a8f3-fc788b31c873/storage_v2/_src_/schema/mysql.osA4Bg.meta
+.idea/dataSources/c7d26e50-1b02-44cc-a8f3-fc788b31c873/storage_v2/_src_/schema/information_schema.FNRwLQ.meta
+.idea/dataSources.xml
+.idea/dataSources/c7d26e50-1b02-44cc-a8f3-fc788b31c873/storage_v2/_src_/schema/performance_schema.kIw0nw.meta
+.idea/dataSources/c7d26e50-1b02-44cc-a8f3-fc788b31c873/storage_v2/_src_/schema/sys.zb4BAA.meta
+pom.xml
+.idea/workspace.xml
+.idea/vcs.xml
+.idea/uiDesigner.xml
+.idea/misc.xml
+.idea/dataSources.xml
