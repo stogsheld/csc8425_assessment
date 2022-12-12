@@ -1,4 +1,6 @@
-//A basic java client using Sockets
+/*
+    A basic Java client that connects up to a server, and allows the user to access various parts of the book database.
+ */
 
 import java.net.*;
 import java.util.Objects;
@@ -40,13 +42,20 @@ public class Client {
     }
 
     private void displayCommandMenu() {
+
+        // Displays all commands that can be used in the program
         System.out.println("Welcome to the book depository!");
         System.out.println();
         System.out.println("--- COMMANDS ---");
-        System.out.println("To search: (Table) search (Title/ISBN/Author/Publisher/Language) <Search Term>");
-        System.out.println("    e.g. book search Title The_Hobbit");
+        System.out.println("To search: (Table) search (Value to search) <Search Term>");
+        System.out.println("    e.g. customer search number 01911234567");
         System.out.println("To add: (Table) add (All info needed)");
         System.out.println("    for books: book add <ISBN> <Title> <Author> <Publisher> <Language>");
+        System.out.println("    for customers: customer add <Name> <Address> <Contact Number>");
+        System.out.println("To update: (Table) update (Value to update) <Old Value> <New Value>");
+        System.out.println("    e.g. book update language German English");
+        System.out.println("To delete: (Table) delete (Value to delete) <Value>");
+        System.out.println("    e.g. book delete title The_Hobbit");
         System.out.println();
         System.out.println("Please enter a command to begin.");
     }

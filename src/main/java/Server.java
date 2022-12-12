@@ -1,4 +1,9 @@
-//A basic java Server using Sockets
+/*
+    A basic Java server that allows the client to access various tables within the book depository database.
+
+    Functionality has been added for books and customers (i.e. the user is able to access data in these tables). The
+    program is able to add/search/update/delete data from both of these tables.
+ */
 
 import java.io.PrintWriter;
 import java.net.*;
@@ -32,7 +37,6 @@ public class Server {
 
                     handleMenuChoice(splitString);
                 }
-
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -44,61 +48,94 @@ public class Server {
         if (splitString.length >= 4) {
             // Converting the input to upper case (in case the user typed it in wrong)
             String convertedString = splitString[1].toUpperCase();
-            // Checking to see if one of the keywords SEARCH or ADD has been triggered
-            if (Objects.equals(convertedString, "ADD")) {
-                insertIntoTable(splitString);
-            } else if (Objects.equals(convertedString, "SEARCH")) {
-                String searchField = splitString[2].toLowerCase();
-                String SQLField = valueToSQLField(searchField);
-                if (SQLField.equals("error")) {
-                    out.println("Incorrect field entered!");
-                } else {
-                    searchTable(splitString, SQLField);
+
+            // Checking which table is to be accessed
+            String tableField = splitString[0].toLowerCase();
+            System.out.println(tableField);
+
+            //Checking which field needs to be targeted in the SEARCH/UPDATE/DELETE fields
+            String searchField = splitString[2].toLowerCase();
+            String SQLField = valueToSQLField(searchField, tableField);
+
+            // Checking to see if one of the keywords has been triggered
+            switch (convertedString) {
+                case "ADD":
+                    insertIntoTable(splitString, tableField);
+                    break;
+                case "SEARCH": {
+                    if (SQLField.equals("error")) {
+                        out.println("Incorrect field entered!");
+                    } else {
+                        searchTable(splitString, tableField, SQLField);
+                    }
+                    break;
                 }
-            } else if (Objects.equals(convertedString, "UPDATE")) {
-                String searchField = splitString[2].toLowerCase();
-                String SQLField = valueToSQLField(searchField);
-                if (SQLField.equals("error")) {
-                    out.println("Incorrect field entered!");
-                } else {
-                    modifyTable(splitString, SQLField);
+                case "UPDATE": {
+                    if (SQLField.equals("error")) {
+                        out.println("Incorrect field entered!");
+                    } else {
+                        modifyTable(splitString, tableField, SQLField);
+                    }
+                    break;
                 }
-            } else if (Objects.equals(convertedString, "DELETE")) {
-                String searchField = splitString[2].toLowerCase();
-                String SQLField = valueToSQLField(searchField);
-                if (SQLField.equals("error")) {
-                    out.println("Incorrect field entered!");
-                } else {
-                    deleteTable(splitString, SQLField);
+                case "DELETE": {
+                    if (SQLField.equals("error")) {
+                        out.println("Incorrect field entered!");
+                    } else {
+                        deleteTable(splitString, tableField, SQLField);
+                    }
+                    break;
                 }
-            } else {
-                out.println("Invalid input! Please use the SEARCH or ADD keywords.");
+                default:
+                    out.println("Invalid input! Please use one of the commands displayed above.");
+                    break;
             }
         } else {
-            out.println("Invalid input! Please make sure your input is at least 3 words long.");
+            out.println("Invalid input! Please make sure your input is at least 4 words long.");
         }
     }
 
-    private String valueToSQLField(String searchField) {
-        switch (searchField) {
-            case "id":
-                return "book_id";
-            case "title":
-                return "book_title";
-            case "isbn":
-                return "book_isbn";
-            case "author":
-                return "book_author";
-            case "publisher":
-                return "book_publisher";
-            case "language":
-                return "book_language";
+
+    // Looks at which table is being accessed, and which value from the table is to be updated/searched/deleted
+    private String valueToSQLField(String searchField, String tableField) {
+
+        switch (tableField) {
+            case "book":
+                switch (searchField) {
+                    case "id":
+                        return "book_id";
+                    case "title":
+                        return "book_title";
+                    case "isbn":
+                        return "book_isbn";
+                    case "author":
+                        return "book_author";
+                    case "publisher":
+                        return "book_publisher";
+                    case "language":
+                        return "book_language";
+                    default:
+                        return "error";
+                }
+            case "customer":
+                switch (searchField) {
+                    case "name":
+                        return "customer_name";
+                    case "address":
+                        return "customer_post_address";
+                    case "phone":
+                        return "customer_contact_number";
+                    default:
+                        return "error";
+                }
             default:
                 return "error";
         }
     }
 
-    private void searchTable(String[] splitString, String SQLField) {
+
+    // Searches the chosen table and returns results based on the column & value entered
+    private void searchTable(String[] splitString, String tableField, String SQLField) {
         if (splitString.length == 4) {
             try (
                     //Create a connection
@@ -111,7 +148,7 @@ public class Server {
                     Statement statement = conn.createStatement();
             ) {
                 //Build SQL statement
-                String search = "SELECT * FROM `csc8425_assessment`.`book` WHERE "
+                String search = "SELECT * FROM `csc8425_assessment`.`" + tableField + "` WHERE "
                         + SQLField + "='" + splitString[3] + "';";
                 System.out.println("The SQL statement is: " + search + "\n");
 
@@ -121,22 +158,29 @@ public class Server {
                 //Print out results if a match is found
                 if (resultSet.next()) {
                     while (resultSet.next()) {
-                        out.println("ISBN: " + resultSet.getString(2) + ", Title: " +
-                                resultSet.getString(3) + ", Author: " + resultSet.getString(4) +
-                                ", Publisher: " + resultSet.getString(5) + ", Language: " +
-                                resultSet.getString(6));
+                        if (tableField.equals("book")) {
+                            out.println("ISBN: " + resultSet.getString(2) + ", Title: " +
+                                    resultSet.getString(3) + ", Author: " + resultSet.getString(4) +
+                                    ", Publisher: " + resultSet.getString(5) + ", Language: " +
+                                    resultSet.getString(6));
+                        } else if (tableField.equals("customer")) {
+                            out.println("Customer Name: " + resultSet.getString(2) + ", Address: " +
+                                    resultSet.getString(3) + ", Phone Number: " + resultSet.getString(4));
+                        }
                     }
                 } else out.println("There are no matches for this search term!");
             } catch (SQLException e) {
                 e.printStackTrace();
                 out.println("Method failed");
             }
-        } else out.println("Invalid search! Please use the format SEARCH (Search Type e.g. title, ISBN) (Search term");
+        } else
+            out.println("Invalid search! Please use the format SEARCH (Search Type e.g. title, ISBN) <Search term>");
     }
 
 
-    public void insertIntoTable(String[] insertString) {
-        if (insertString.length == 6) {
+    // Adds a new row to the chosen table with user entered values
+    public void insertIntoTable(String[] insertString, String tableField) {
+        if (insertString.length == 7 || insertString.length == 5) {
             try (
                     //Create a connection
                     Connection conn = DriverManager.getConnection(
@@ -147,33 +191,49 @@ public class Server {
                     //Create a statement in the SQL connection
                     Statement statement = conn.createStatement();
             ) {
-                //Build SQL statment
-                String insert = "INSERT INTO `csc8425_assessment`.`book`" +
-                        "(`book_isbn`," +
-                        "`book_title`," +
-                        "`book_author`," +
-                        "`book_publisher`," +
-                        "`book_language`)" +
-                        "VALUES" +
-                        "('" + insertString[1] + "'," +
-                        "'" + insertString[2] + "'," +
-                        "'" + insertString[3] + "'," +
-                        "'" + insertString[4] + "'," +
-                        "'" + insertString[5] + "');";
-                System.out.println("The SQL statement is: " + insert + "\n");
-
-                //Execute Query
-                statement.execute(insert);
-                out.println("Book added!");
+                //Build SQL statement
+                if (tableField.equals("book")) {
+                    String insert = "INSERT INTO `csc8425_assessment`.`book`" +
+                            "(`book_isbn`," +
+                            "`book_title`," +
+                            "`book_author`," +
+                            "`book_publisher`," +
+                            "`book_language`)" +
+                            "VALUES" +
+                            "('" + insertString[2] + "'," +
+                            "'" + insertString[3] + "'," +
+                            "'" + insertString[4] + "'," +
+                            "'" + insertString[5] + "'," +
+                            "'" + insertString[6] + "');";
+                    System.out.println("The SQL statement is: " + insert + "\n");
+                    //Execute Query
+                    statement.execute(insert);
+                    out.println("Book added!");
+                } else if (tableField.equals("customer")) {
+                    String insert = "INSERT INTO `csc8425_assessment`.`customer`" +
+                            "(`customer_name`," +
+                            "`customer_post_address`," +
+                            "`customer_contact_number`)" +
+                            "VALUES" +
+                            "('" + insertString[2] + "'," +
+                            "'" + insertString[3] + "'," +
+                            "'" + insertString[4] + "');";
+                    System.out.println("The SQL statement is: " + insert + "\n");
+                    //Execute Query
+                    statement.execute(insert);
+                    out.println("Customer added!");
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
                 out.println("Method failed");
             }
 
-        } else out.println("Invalid input! Please use the format ADD ISBN Book_Title Author Publisher Language");
+        } else out.println("Invalid input! Please refer to the commands above to add a book/customer.");
     }
 
-    public void modifyTable(String[] modifyString, String SQLField) {
+
+    // Replaces all values in a chosen table with another value
+    public void modifyTable(String[] modifyString, String tableField, String SQLField) {
         if (modifyString.length == 5) {
             try (
                     //Create a connection
@@ -186,8 +246,8 @@ public class Server {
                     Statement statement = conn.createStatement();
             ) {
                 //Build SQL statement
-                String update = "UPDATE `csc8425_assessment`.`book` " + "SET " + SQLField + "='" + modifyString[4] + "' WHERE "
-                        + SQLField + "='" + modifyString[3] + "';";
+                String update = "UPDATE `csc8425_assessment`.`" + tableField + "` " + "SET " + SQLField + "='" + modifyString[4] +
+                        "' WHERE " + SQLField + "='" + modifyString[3] + "';";
                 System.out.println("The SQL statement is: " + update + "\n");
 
                 // Execute Query
@@ -204,7 +264,9 @@ public class Server {
             out.println("Invalid update! Please use the format (Table) update (Value to update) <Old Value> <New Value>");
     }
 
-    public void deleteTable(String[] deleteString, String SQLField){
+
+    // Deletes all rows in a chosen table with the chosen value
+    public void deleteTable(String[] deleteString, String tableField, String SQLField) {
         if (deleteString.length == 4) {
             try (
                     //Create a connection
@@ -217,7 +279,7 @@ public class Server {
                     Statement statement = conn.createStatement();
             ) {
                 //Build SQL statement
-                String delete = "DELETE FROM `csc8425_assessment`.`book` WHERE "
+                String delete = "DELETE FROM `csc8425_assessment`.`" + tableField + "` WHERE "
                         + SQLField + "='" + deleteString[3] + "';";
                 System.out.println("The SQL statement is: " + delete + "\n");
 
