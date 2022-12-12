@@ -3,12 +3,14 @@
 
     Functionality has been added for books and customers (i.e. the user is able to access data in these tables). The
     program is able to add/search/update/delete data from both of these tables.
+
+    NOTE - for the update/delete functions to work, you need to go into MySQL Workbench -> Preferences -> SQL Editor
+    and disable the 'Safe Updates' box, then restart MySQL.
  */
 
 import java.io.PrintWriter;
 import java.net.*;
 import java.sql.*;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class Server {
@@ -51,11 +53,8 @@ public class Server {
 
             // Checking which table is to be accessed
             String tableField = splitString[0].toLowerCase();
-            System.out.println(tableField);
+            System.out.println("Table Accessed: " + tableField);
 
-            //Checking which field needs to be targeted in the SEARCH/UPDATE/DELETE fields
-            String searchField = splitString[2].toLowerCase();
-            String SQLField = valueToSQLField(searchField, tableField);
 
             // Checking to see if one of the keywords has been triggered
             switch (convertedString) {
@@ -63,6 +62,9 @@ public class Server {
                     insertIntoTable(splitString, tableField);
                     break;
                 case "SEARCH": {
+                    //Checking which field needs to be targeted in the SEARCH/UPDATE/DELETE fields
+                    String searchField = splitString[2].toLowerCase();
+                    String SQLField = valueToSQLField(searchField, tableField);
                     if (SQLField.equals("error")) {
                         out.println("Incorrect field entered!");
                     } else {
@@ -71,6 +73,9 @@ public class Server {
                     break;
                 }
                 case "UPDATE": {
+                    //Checking which field needs to be targeted in the SEARCH/UPDATE/DELETE fields
+                    String searchField = splitString[2].toLowerCase();
+                    String SQLField = valueToSQLField(searchField, tableField);
                     if (SQLField.equals("error")) {
                         out.println("Incorrect field entered!");
                     } else {
@@ -79,6 +84,9 @@ public class Server {
                     break;
                 }
                 case "DELETE": {
+                    //Checking which field needs to be targeted in the SEARCH/UPDATE/DELETE fields
+                    String searchField = splitString[2].toLowerCase();
+                    String SQLField = valueToSQLField(searchField, tableField);
                     if (SQLField.equals("error")) {
                         out.println("Incorrect field entered!");
                     } else {
@@ -157,18 +165,18 @@ public class Server {
 
                 //Print out results if a match is found
                 if (resultSet.next()) {
-                    while (resultSet.next()) {
-                        if (tableField.equals("book")) {
-                            out.println("ISBN: " + resultSet.getString(2) + ", Title: " +
-                                    resultSet.getString(3) + ", Author: " + resultSet.getString(4) +
-                                    ", Publisher: " + resultSet.getString(5) + ", Language: " +
-                                    resultSet.getString(6));
-                        } else if (tableField.equals("customer")) {
-                            out.println("Customer Name: " + resultSet.getString(2) + ", Address: " +
-                                    resultSet.getString(3) + ", Phone Number: " + resultSet.getString(4));
-                        }
+                    if (tableField.equals("book")) {
+                        out.println("ISBN: " + resultSet.getString(2) + ", Title: " +
+                                resultSet.getString(3) + ", Author: " + resultSet.getString(4) +
+                                ", Publisher: " + resultSet.getString(5) + ", Language: " +
+                                resultSet.getString(6));
+                    } else if (tableField.equals("customer")) {
+                        out.println("Name: " + resultSet.getString(2) + ", Address: " +
+                                resultSet.getString(3) + ", Phone Number: "
+                                + resultSet.getString(4));
                     }
                 } else out.println("There are no matches for this search term!");
+
             } catch (SQLException e) {
                 e.printStackTrace();
                 out.println("Method failed");
@@ -253,8 +261,8 @@ public class Server {
                 // Execute Query
                 statement.execute(update);
 
-                out.println("Updated successfully! " + SQLField + " with the value " + modifyString[4] +
-                        " have been changed to " + modifyString[3]);
+                out.println("Updated successfully! " + SQLField + " with the value " + modifyString[3] +
+                        " have been changed to " + modifyString[4]);
 
             } catch (SQLException e) {
                 e.printStackTrace();
